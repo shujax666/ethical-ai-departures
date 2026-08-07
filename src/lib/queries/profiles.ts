@@ -30,7 +30,7 @@ export async function getProfileBySlug(slug: string) {
         concern_tags(id, name, slug)
       ),
       profile_sources(id, url, title, platform, source_type, published_date),
-      publications(id, title, url, publication_type, publisher, published_date, abstract)
+      publications(id, title, url, publication_type, publisher, published_date, published_date_precision, last_updated_at, abstract)
     `)
     .eq("slug", slug)
     .eq("status", "published")

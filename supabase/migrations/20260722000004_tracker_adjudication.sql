@@ -110,6 +110,12 @@ WHERE title = 'US government is dangerously unprepared for transformative AI';
 -- Guards from the review's acceptance checks (added after data correction):
 -- a confirmed record must carry a resolution date, reviewer, and evidence;
 -- non-forecast types can never be confirmed.
+-- Records not included in this adjudication batch remain visibly pending
+-- review rather than retaining a legacy resolved status that cannot satisfy
+-- the new review requirements.
+UPDATE predictions SET status = 'pending_review'
+WHERE under_review = true;
+
 ALTER TABLE predictions ADD CONSTRAINT predictions_confirmed_requires_review
   CHECK (status != 'confirmed'
          OR (resolution_date IS NOT NULL

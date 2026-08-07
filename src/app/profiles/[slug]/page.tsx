@@ -50,7 +50,10 @@ export async function generateMetadata({
 
   return {
     title: profileTitle(profile.name, profile.company, year),
-    description: `${profile.name} departed ${profile.company} in ${year}, ${evidenceClause}. Sourced account with evidence labels, linked statements, and papers.`,
+    description: profile.seoDescription ?? `${profile.name} departed ${profile.company} in ${year}, ${evidenceClause}. Sourced account with evidence labels, linked statements, and papers.`,
+    alternates: {
+      canonical: `${siteUrl}/profiles/${profile.slug}`,
+    },
     openGraph: {
       images: [`${siteUrl}/api/og?${ogParams}`],
     },
@@ -83,11 +86,11 @@ export default async function ProfileDetailPage({
       {/* Header */}
       <div className="flex items-start gap-4">
         <Avatar name={profile.name} photoUrl={profile.photoUrl} size={64} />
-        <div>
+        <div className="min-w-0">
           <h1 className="font-serif text-3xl font-semibold text-text-primary">
             {profile.name}
           </h1>
-          <p className="mt-1 text-lg text-text-secondary">
+          <p className="mt-1 break-words text-lg text-text-secondary">
             {profile.role} · {profile.company} · {year}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -119,6 +122,23 @@ export default async function ProfileDetailPage({
         <blockquote className="mt-8 border-l-[3px] border-accent-amber pl-4 text-lg italic text-text-secondary">
           {profile.statedReason}
         </blockquote>
+      )}
+
+      {profile.departureDateNote && (
+        <p className="mt-3 text-sm text-text-secondary">
+          {profile.departureDateNote}
+        </p>
+      )}
+
+      {profile.motiveQuote && (
+        <figure className="mt-6 rounded-lg border border-border-light bg-surface-card px-5 py-4">
+          <blockquote className="font-serif text-lg text-text-primary">
+            &ldquo;{profile.motiveQuote}&rdquo;
+          </blockquote>
+          <figcaption className="mt-2 text-sm text-text-secondary">
+            First-party departure statement
+          </figcaption>
+        </figure>
       )}
 
       {/* Editorial Context */}
@@ -315,6 +335,7 @@ export default async function ProfileDetailPage({
               "@type": "Organization",
               name: profile.company,
             },
+            url: `${(process.env.NEXT_PUBLIC_SITE_URL ?? "https://ethicalaidepartures.fyi").trim()}/profiles/${profile.slug}`,
           }),
         }}
       />

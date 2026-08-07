@@ -9,6 +9,7 @@ import {
 
 const tickerRowSchema = z.object({
   departure_date: z.string(),
+  departure_date_precision: z.enum(["day", "month", "year"]).catch("day"),
   motive_evidence: z
     .enum(["direct", "reported", "alleged", "contextual"])
     .catch("contextual"),
@@ -36,7 +37,7 @@ export async function getTickerStats(): Promise<TickerStats> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from("profiles")
-    .select("departure_date, motive_evidence, headline_counted")
+    .select("departure_date, departure_date_precision, motive_evidence, headline_counted")
     .eq("status", "published")
 
   if (error) throw error

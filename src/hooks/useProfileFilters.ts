@@ -43,6 +43,11 @@ export interface FilterOption {
   count: number
 }
 
+/** Normalize accents so searches for "Rene" also match "René". */
+export function normalizeSearchText(value: string): string {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+}
+
 export function extractFilterOptions(profiles: ProfileWithTags[]) {
   const companyMap = new Map<string, number>()
   const yearMap = new Map<string, number>()
@@ -87,7 +92,7 @@ export function filterProfiles(
 
   // Text search
   if (filters.q) {
-    const terms = filters.q.toLowerCase().split(/\s+/).filter(Boolean)
+    const terms = normalizeSearchText(filters.q).split(/\s+/).filter(Boolean)
     result = result.filter((p) => {
       const searchable = [
         p.name,
@@ -97,8 +102,8 @@ export function filterProfiles(
         ...p.concernTags.map((t) => t.name),
       ]
         .join(" ")
-        .toLowerCase()
-      return terms.every((term) => searchable.includes(term))
+      const normalizedSearchable = normalizeSearchText(searchable)
+      return terms.every((term) => normalizedSearchable.includes(term))
     })
   }
 

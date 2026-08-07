@@ -95,6 +95,21 @@ describe("ProfileDetailPage", () => {
     ).toBeInTheDocument()
   })
 
+  it("renders a public date note and first-party motive quote", async () => {
+    mockGetProfileBySlug.mockResolvedValueOnce({
+      ...mockProfile,
+      departureDateNote: "Resigned in June 2026; the exact day is not publicly documented.",
+      motiveQuote: "I couldn't stay in good conscience, so I left.",
+    })
+
+    const jsx = await ProfileDetailPage({ params })
+    render(jsx)
+
+    expect(screen.getByText(/exact day is not publicly documented/)).toBeInTheDocument()
+    expect(screen.getByText(/I couldn't stay in good conscience/)).toBeInTheDocument()
+    expect(screen.getByText("First-party departure statement")).toBeInTheDocument()
+  })
+
   it("renders concern tags as links", async () => {
     const jsx = await ProfileDetailPage({ params })
     render(jsx)
@@ -215,6 +230,18 @@ describe("generateMetadata", () => {
     expect(metadata.title).toContain("OpenAI")
     expect(metadata.description).toContain("Elena Rodriguez")
     expect(metadata.description).toContain("2025")
+    expect(metadata.alternates?.canonical).toContain("/profiles/elena-rodriguez")
+  })
+
+  it("uses an editorial SEO description when supplied", async () => {
+    mockGetProfileBySlug.mockResolvedValueOnce({
+      ...mockProfile,
+      seoDescription: "Custom editorial description.",
+    })
+
+    const metadata = await generateMetadata({ params })
+
+    expect(metadata.description).toBe("Custom editorial description.")
   })
 
   it("returns not found metadata when profile missing", async () => {

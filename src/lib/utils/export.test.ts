@@ -74,7 +74,7 @@ describe("profilesToCsv", () => {
     const lines = csv.split("\n")
 
     expect(lines[0]).toBe(
-      "Name,Company,Role,Departure Date,Stated Reason,Concern Tags,Permalink,Departure Type,Evidence,Claim Status,Headline Counted"
+      "Name,Company,Role,Departure Date,Departure Date Precision,Effective Departure Date,Departure Date Note,Stated Reason,Concern Tags,Permalink,Departure Type,Evidence,Claim Status,Headline Counted"
     )
     expect(lines).toHaveLength(3) // header + 2 rows
   })

@@ -10,6 +10,10 @@ export const profileRowSchema = z.object({
   company: z.string(),
   role: z.string(),
   departure_date: z.string(),
+  departure_date_precision: z.enum(["day", "month", "year"]).catch("day"),
+  effective_departure_date: z.string().nullish().catch(null),
+  departure_date_note: z.string().nullish().catch(null),
+  seo_description: z.string().nullish().catch(null),
   stated_reason: z.string().nullable(),
   departure_context: z.string().nullable().default(null),
   status: z.enum(["draft", "published", "archived"]),
@@ -71,6 +75,10 @@ export const profileSchema = profileRowSchema.transform((row) => ({
   company: row.company,
   role: row.role,
   departureDate: row.departure_date,
+  departureDatePrecision: row.departure_date_precision,
+  effectiveDepartureDate: row.effective_departure_date ?? null,
+  departureDateNote: row.departure_date_note ?? null,
+  seoDescription: row.seo_description ?? null,
   statedReason: row.stated_reason,
   departureContext: row.departure_context,
   status: row.status,
@@ -92,6 +100,7 @@ export const profileSourceSchema = profileSourceRowSchema.transform((row) => ({
   url: row.url,
   title: row.title,
   platform: row.platform,
+  sourceType: row.source_type ?? null,
   publishedDate: row.published_date,
   createdAt: row.created_at,
 }))
@@ -132,6 +141,10 @@ export const profileWithTagsSchema = profileWithTagsRowSchema.transform((row) =>
   company: row.company,
   role: row.role,
   departureDate: row.departure_date,
+  departureDatePrecision: row.departure_date_precision,
+  effectiveDepartureDate: row.effective_departure_date ?? null,
+  departureDateNote: row.departure_date_note ?? null,
+  seoDescription: row.seo_description ?? null,
   statedReason: row.stated_reason,
   departureContext: row.departure_context,
   status: row.status,
@@ -174,9 +187,23 @@ export const profileDetailRowSchema = profileRowSchema.extend({
     id: z.string().uuid(),
     title: z.string(),
     url: z.string().nullable(),
-    publication_type: z.enum(["paper", "white_paper", "report", "preprint"]).nullable(),
+    publication_type: z
+      .enum([
+        "paper",
+        "white_paper",
+        "report",
+        "preprint",
+        "essay",
+        "resignation_letter",
+        "legal_analysis",
+        "forecast_essay",
+        "testimony",
+      ])
+      .nullable(),
     publisher: z.string().nullable(),
     published_date: z.string().nullable(),
+    published_date_precision: z.enum(["day", "month", "year"]).catch("day"),
+    last_updated_at: z.string().nullish().catch(null),
     abstract: z.string().nullable(),
   })).default([]),
 })
@@ -189,6 +216,10 @@ export const profileDetailSchema = profileDetailRowSchema.transform((row) => ({
   company: row.company,
   role: row.role,
   departureDate: row.departure_date,
+  departureDatePrecision: row.departure_date_precision,
+  effectiveDepartureDate: row.effective_departure_date ?? null,
+  departureDateNote: row.departure_date_note ?? null,
+  seoDescription: row.seo_description ?? null,
   statedReason: row.stated_reason,
   departureContext: row.departure_context,
   status: row.status,
@@ -207,14 +238,20 @@ export const profileDetailSchema = profileDetailRowSchema.transform((row) => ({
     name: pct.concern_tags.name,
     slug: pct.concern_tags.slug,
   })),
-  sources: row.profile_sources.map((s) => ({
+  sources: [...row.profile_sources]
+    .sort((a, b) => {
+      const sourceRank = (sourceType: string | null | undefined) =>
+        sourceType === "first_party" ? 0 : sourceType === "reporting" ? 1 : 2
+      return sourceRank(a.source_type) - sourceRank(b.source_type)
+    })
+    .map((s) => ({
     id: s.id,
     url: s.url,
     title: s.title,
     platform: s.platform,
     sourceType: s.source_type ?? null,
     publishedDate: s.published_date,
-  })),
+    })),
   publications: row.publications.map((pub) => ({
     id: pub.id,
     title: pub.title,
@@ -222,6 +259,8 @@ export const profileDetailSchema = profileDetailRowSchema.transform((row) => ({
     publicationType: pub.publication_type,
     publisher: pub.publisher,
     publishedDate: pub.published_date,
+    publishedDatePrecision: pub.published_date_precision,
+    lastUpdatedAt: pub.last_updated_at ?? null,
     abstract: pub.abstract,
   })),
 }))

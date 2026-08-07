@@ -182,6 +182,22 @@ describe("filterProfiles", () => {
     expect(result).toHaveLength(3)
   })
 
+  it("matches accented names with an ASCII search", () => {
+    const result = filterProfiles(
+      [makeProfile({ name: "René Mayrhofer", slug: "rene-mayrhofer" })],
+      {
+        company: [],
+        year: [],
+        concern: [],
+        sort: "date",
+        view: "card",
+        q: "Rene",
+      }
+    )
+
+    expect(result.map((profile) => profile.slug)).toEqual(["rene-mayrhofer"])
+  })
+
   it("filters by company", () => {
     const result = filterProfiles(profiles, {
       company: ["openai"],
